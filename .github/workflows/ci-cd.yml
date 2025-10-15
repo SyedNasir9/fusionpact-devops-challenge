@@ -40,11 +40,11 @@ jobs:
 
       - name: Deploy via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            git config --global --add safe.directory $REMOTE_DIR &&
             cd $REMOTE_DIR &&
             git pull origin main &&
             docker-compose pull &&
             docker-compose up -d --remove-orphans
-          "
+            "
 
-          
