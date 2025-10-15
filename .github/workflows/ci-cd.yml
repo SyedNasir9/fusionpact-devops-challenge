@@ -44,7 +44,6 @@ jobs:
             git config --global --add safe.directory $REMOTE_DIR &&
             cd $REMOTE_DIR &&
             git pull origin main &&
-            docker-compose pull &&
-            docker-compose up -d --remove-orphans
+            docker compose pull &&
+            docker compose up -d --remove-orphans
             "
-            
