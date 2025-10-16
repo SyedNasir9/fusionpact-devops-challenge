@@ -1,27 +1,35 @@
 version: '3.8'
+
 services:
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
-    image:  syednasir9/fusionpact-backend:latest
+      context: ./backend
+      dockerfile: Dockerfile
+    image: syednasir9/fusionpact-backend:latest
     volumes:
       - backend_data:/app/data
     ports:
       - "8000:8000"
     restart: unless-stopped
+    networks:
+      - fusionpact-net
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     image: syednasir9/fusionpact-frontend:latest
     ports:
-      - "80:80" 
+      - "80:80"
     restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - fusionpact-net
 
   prometheus:
     image: prom/prometheus:latest
+    container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
@@ -29,9 +37,12 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     restart: unless-stopped
+    networks:
+      - fusionpact-net
 
   grafana:
     image: grafana/grafana:latest
+    container_name: grafana
     ports:
       - "3000:3000"
     environment:
@@ -39,28 +50,42 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
     restart: unless-stopped
+    networks:
+      - fusionpact-net
 
   cadvisor:
-    image: google/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
     ports:
       - "8081:8080"
     volumes:
       - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/lib/docker/:/var/lib/docker:ro
+      - /sys:/sys:ro
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     restart: unless-stopped
+    networks:
+      - fusionpact-net
 
   node_exporter:
     image: prom/node-exporter:latest
-    restart: unless-stopped
+    container_name: node_exporter
     command:
       - '--path.rootfs=/host'
     volumes:
       - /:/host:ro
+    restart: unless-stopped
+    networks:
+      - fusionpact-net
 
 volumes:
   backend_data:
   grafana_data:
+
+networks:
+  fusionpact-net:
+    driver: bridge
