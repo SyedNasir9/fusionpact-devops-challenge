@@ -27,7 +27,7 @@ jobs:
 
       - name: Build & Push Docker Images
         run: |
-          docker build -t $DOCKERHUB_USER/fusionpact-backend:latest -f backend/Dockerfile .
+          docker build -t $DOCKERHUB_USER/fusionpact-backend:latest -f backend/Dockerfile backend/
           docker push $DOCKERHUB_USER/fusionpact-backend:latest
           docker build -t $DOCKERHUB_USER/fusionpact-frontend:latest -f frontend/Dockerfile .
           docker push $DOCKERHUB_USER/fusionpact-frontend:latest
